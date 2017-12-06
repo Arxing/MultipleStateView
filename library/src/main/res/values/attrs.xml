@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="DoubleStateView">
+        <attr name="double_state"
+              format="enum">
+            <enum name="state_on"
+                  value="1"/>
+            <enum name="state_off"
+                  value="-1"/>
+        </attr>
+        <attr name="double_trans_duration" format="integer"/>
+    </declare-styleable>
+
+
+    <declare-styleable name="MultipleStateView">
+        <attr name="msv_transDuration" format="integer"/>
+        <attr name="msv_select" format="integer|string|reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="MultipleStateView_Layout">
+        <attr name="layout_regName" format="string|reference"/>
+    </declare-styleable>
+</resources>
