@@ -85,6 +85,25 @@ public class MultipleStateView extends ViewAnimator {
         setDisplayedChild(regMap.get(regName));
     }
 
+    public void setDisplayedChildWithoutAnimation(int whichChild){
+        if (whichChild == getDisplayedChild())
+            return;
+        if (whichChild > getChildCount() || whichChild < 0)
+            throw new ArrayIndexOutOfBoundsException();
+        selectIndex = whichChild;
+        useIndex = true;
+        hideAnimation();
+        super.setDisplayedChild(whichChild);
+        restoreAnimation();
+    }
+
+    public void setDisplayedChildWithoutAnimation(String regName){
+        if (!regMap.containsKey(regName))
+            throw new IllegalStateException("name " + regName + " not exist.");
+        useIndex = false;
+        setDisplayedChildWithoutAnimation(regMap.get(regName));
+    }
+
     private void setDisplayedChildIgnoreException(int whichChild) {
         if (whichChild > getChildCount() || whichChild < 0)
             return;
@@ -97,25 +116,6 @@ public class MultipleStateView extends ViewAnimator {
             return;
         selectIndex = regMap.get(regName);
         super.setDisplayedChild(selectIndex);
-    }
-
-    private void setDisplayedChildWithoutAnimation(int whichChild){
-        if (whichChild == getDisplayedChild())
-            return;
-        if (whichChild > getChildCount() || whichChild < 0)
-            throw new ArrayIndexOutOfBoundsException();
-        selectIndex = whichChild;
-        useIndex = true;
-        hideAnimation();
-        super.setDisplayedChild(whichChild);
-        restoreAnimation();
-    }
-
-    private void setDisplayedChildWithoutAnimation(String regName){
-        if (!regMap.containsKey(regName))
-            throw new IllegalStateException("name " + regName + " not exist.");
-        useIndex = false;
-        setDisplayedChildWithoutAnimation(regMap.get(regName));
     }
 
     private void hideAnimation(){
