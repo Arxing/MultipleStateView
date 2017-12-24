@@ -28,6 +28,7 @@ public class MultipleStateView extends ViewAnimator {
     private int selectIndex;
     private String selectName;
     private boolean useIndex;
+    private Animation inAnim, outAnim;
 
 
     public MultipleStateView(Context context, AttributeSet attrs) {
@@ -51,17 +52,17 @@ public class MultipleStateView extends ViewAnimator {
             ta.recycle();
         }
         if (!isInEditMode()) {
-            AlphaAnimation inAm = new AlphaAnimation(0, 1);
-            inAm.setInterpolator(new LinearInterpolator());
-            inAm.setDuration(transDuration);
-            inAm.setAnimationListener(animListener);
-            setInAnimation(inAm);
+            inAnim = new AlphaAnimation(0, 1);
+            inAnim.setInterpolator(new LinearInterpolator());
+            inAnim.setDuration(transDuration);
+            inAnim.setAnimationListener(animListener);
+            setInAnimation(inAnim);
 
-            AlphaAnimation outAm = new AlphaAnimation(1, 0);
-            outAm.setInterpolator(new LinearInterpolator());
-            outAm.setDuration(transDuration);
-            outAm.setAnimationListener(animListener);
-            setOutAnimation(outAm);
+            outAnim = new AlphaAnimation(1, 0);
+            outAnim.setInterpolator(new LinearInterpolator());
+            outAnim.setDuration(transDuration);
+            outAnim.setAnimationListener(animListener);
+            setOutAnimation(outAnim);
         }
     }
 
@@ -79,7 +80,7 @@ public class MultipleStateView extends ViewAnimator {
 
     public void setDisplayedChild(String regName) {
         if (!regMap.containsKey(regName))
-            throw new IllegalStateException("name " + regName + " 不存在");
+            throw new IllegalStateException("name " + regName + " not exist.");
         useIndex = false;
         setDisplayedChild(regMap.get(regName));
     }
@@ -98,6 +99,35 @@ public class MultipleStateView extends ViewAnimator {
         super.setDisplayedChild(selectIndex);
     }
 
+    private void setDisplayedChildWithoutAnimation(int whichChild){
+        if (whichChild == getDisplayedChild())
+            return;
+        if (whichChild > getChildCount() || whichChild < 0)
+            throw new ArrayIndexOutOfBoundsException();
+        selectIndex = whichChild;
+        useIndex = true;
+        hideAnimation();
+        super.setDisplayedChild(whichChild);
+        restoreAnimation();
+    }
+
+    private void setDisplayedChildWithoutAnimation(String regName){
+        if (!regMap.containsKey(regName))
+            throw new IllegalStateException("name " + regName + " not exist.");
+        useIndex = false;
+        setDisplayedChildWithoutAnimation(regMap.get(regName));
+    }
+
+    private void hideAnimation(){
+        setInAnimation(null);
+        setOutAnimation(null);
+    }
+
+    private void restoreAnimation(){
+        setInAnimation(inAnim);
+        setOutAnimation(outAnim);
+    }
+
     @Override public void addView(View child, int index, ViewGroup.LayoutParams params) {
         super.addView(child, index, params);
         if(useIndex)
@@ -107,18 +137,18 @@ public class MultipleStateView extends ViewAnimator {
         if (params instanceof MultipleStateView.LayoutParams) {
             String name = ((LayoutParams) params).registerName;
             if (name == null || name.isEmpty())
-                throw new NullPointerException("每個Child必須設置name");
+                throw new NullPointerException("Every child must set name.");
             register(name, getChildCount() - 1);
         } else {
-            throw new IllegalStateException("Child只能裝載MultipleStateView.LayoutParams");
+            throw new IllegalStateException("Child's LayoutParams only be instanceof MultipleStateView.LayoutParams.");
         }
     }
 
     public void register(String name, int select) {
         if (regMap.containsKey(name))
-            throw new IllegalStateException("name不能重複");
+            throw new IllegalStateException("Duplicate names exist.");
         if (select < 0 || select > getChildCount())
-            throw new ArrayIndexOutOfBoundsException("不合法的索引");
+            throw new ArrayIndexOutOfBoundsException("Invalid Index.");
         regMap.put(name, select);
     }
 
