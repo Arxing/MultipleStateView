@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.Printer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -24,23 +26,34 @@ public class MultipleStateView extends ViewAnimator {
     /// properties
     private int transDuration;
     private boolean isAnimating;
-    private Map<String, Integer> regMap = new HashMap<>();
     private int selectIndex;
+    private boolean firstEnterAnimation;
+
+    private Map<String, Integer> regMap = new HashMap<>();
     private String selectName;
     private boolean useIndex;
     private Animation inAnim, outAnim;
 
+    public MultipleStateView(Context context) {
+        super(context);
+        initAttrs(null);
+        init();
+    }
 
     public MultipleStateView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initTypedArray(context, attrs);
+        initAttrs(attrs);
+        init();
     }
 
-    private void initTypedArray(Context context, AttributeSet attrs) {
+    private void initAttrs(AttributeSet attrs) {
         if (attrs == null) {
-
+            transDuration = 100;
+            selectIndex = 0;
+            useIndex = true;
+            firstEnterAnimation = false;
         } else {
-            TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.MultipleStateView);
+            TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.MultipleStateView);
             transDuration = ta.getInt(R.styleable.MultipleStateView_msv_transDuration, 100);
             try {
                 selectIndex = ta.getInt(R.styleable.MultipleStateView_msv_select, 0);
@@ -49,8 +62,13 @@ public class MultipleStateView extends ViewAnimator {
                 selectName = ta.getString(R.styleable.MultipleStateView_msv_select);
                 useIndex = false;
             }
+            firstEnterAnimation = ta.getBoolean(R.styleable.MultipleStateView_msv_first_enter_anim, false);
             ta.recycle();
         }
+    }
+
+    private void init(){
+        setAnimateFirstView(firstEnterAnimation);
         if (!isInEditMode()) {
             inAnim = new AlphaAnimation(0, 1);
             inAnim.setInterpolator(new LinearInterpolator());
@@ -78,6 +96,11 @@ public class MultipleStateView extends ViewAnimator {
         super.setDisplayedChild(whichChild);
     }
 
+    @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        heightMeasureSpec = MeasureSpec.makeMeasureSpec(getChildAt(selectIndex).getMeasuredHeight(), MeasureSpec.AT_MOST);
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
     public void setDisplayedChild(String regName) {
         if (!regMap.containsKey(regName))
             throw new IllegalStateException("name " + regName + " not exist.");
@@ -85,7 +108,7 @@ public class MultipleStateView extends ViewAnimator {
         setDisplayedChild(regMap.get(regName));
     }
 
-    public void setDisplayedChildWithoutAnimation(int whichChild){
+    public void setDisplayedChildWithoutAnimation(int whichChild) {
         if (whichChild == getDisplayedChild())
             return;
         if (whichChild > getChildCount() || whichChild < 0)
@@ -97,11 +120,47 @@ public class MultipleStateView extends ViewAnimator {
         restoreAnimation();
     }
 
-    public void setDisplayedChildWithoutAnimation(String regName){
+    public void setDisplayedChildWithoutAnimation(String regName) {
         if (!regMap.containsKey(regName))
             throw new IllegalStateException("name " + regName + " not exist.");
         useIndex = false;
         setDisplayedChildWithoutAnimation(regMap.get(regName));
+    }
+
+    public void turnNextChild() {
+        if (getChildCount() == 0 || getChildCount() == 1)
+            return;
+        if (selectIndex < getChildCount() - 1)
+            setDisplayedChild(selectIndex + 1);
+        else
+            setDisplayedChild(0);
+    }
+
+    public void turnPreviousChild() {
+        if (getChildCount() == 0 || getChildCount() == 1)
+            return;
+        if (selectIndex > 0)
+            setDisplayedChild(selectIndex - 1);
+        else
+            setDisplayedChild(getChildCount() - 1);
+    }
+
+    public void turnNextChildWithoutAnimation() {
+        if (getChildCount() == 0 || getChildCount() == 1)
+            return;
+        if (selectIndex < getChildCount() - 1)
+            setDisplayedChildWithoutAnimation(selectIndex + 1);
+        else
+            setDisplayedChildWithoutAnimation(0);
+    }
+
+    public void turnPreviousChildWithoutAnimation() {
+        if (getChildCount() == 0 || getChildCount() == 1)
+            return;
+        if (selectIndex > 0)
+            setDisplayedChildWithoutAnimation(selectIndex - 1);
+        else
+            setDisplayedChildWithoutAnimation(getChildCount() - 1);
     }
 
     private void setDisplayedChildIgnoreException(int whichChild) {
@@ -118,19 +177,19 @@ public class MultipleStateView extends ViewAnimator {
         super.setDisplayedChild(selectIndex);
     }
 
-    private void hideAnimation(){
+    private void hideAnimation() {
         setInAnimation(null);
         setOutAnimation(null);
     }
 
-    private void restoreAnimation(){
+    private void restoreAnimation() {
         setInAnimation(inAnim);
         setOutAnimation(outAnim);
     }
 
     @Override public void addView(View child, int index, ViewGroup.LayoutParams params) {
         super.addView(child, index, params);
-        if(useIndex)
+        if (useIndex)
             setDisplayedChildIgnoreException(selectIndex);
         else
             setDisplayedChildIgnoreException(selectName);
@@ -152,8 +211,8 @@ public class MultipleStateView extends ViewAnimator {
         regMap.put(name, select);
     }
 
-    public View getChildAt(String regName){
-        if(!regMap.containsKey(regName))
+    public View getChildAt(String regName) {
+        if (!regMap.containsKey(regName))
             return null;
         return getChildAt(regMap.get(regName));
     }

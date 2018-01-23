@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="org.arxing.multiplestateview">
+          package="org.arxing.multiplestateview_demo">
 
     <application
         android:allowBackup="true"

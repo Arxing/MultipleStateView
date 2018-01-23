@@ -14,10 +14,11 @@
 
     <declare-styleable name="MultipleStateView">
         <attr name="msv_transDuration" format="integer"/>
-        <attr name="msv_select" format="integer|string|reference"/>
+        <attr name="msv_select" format="integer|string"/>
+        <attr name="msv_first_enter_anim" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="MultipleStateView_Layout">
-        <attr name="layout_regName" format="string|reference"/>
+        <attr name="layout_regName" format="string"/>
     </declare-styleable>
 </resources>
