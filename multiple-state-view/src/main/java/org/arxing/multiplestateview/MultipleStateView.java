@@ -67,7 +67,7 @@ public class MultipleStateView extends ViewAnimator {
         }
     }
 
-    private void init(){
+    private void init() {
         setAnimateFirstView(firstEnterAnimation);
         if (!isInEditMode()) {
             inAnim = new AlphaAnimation(0, 1);
@@ -97,7 +97,15 @@ public class MultipleStateView extends ViewAnimator {
     }
 
     @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        heightMeasureSpec = MeasureSpec.makeMeasureSpec(getChildAt(selectIndex).getMeasuredHeight(), MeasureSpec.AT_MOST);
+        int hSpecSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        View targetChild = getChildAt(selectIndex);
+        int h = targetChild.getLayoutParams().height;
+        if (h == ViewGroup.LayoutParams.MATCH_PARENT) {
+            heightMeasureSpec = MeasureSpec.makeMeasureSpec(hSpecSize, MeasureSpec.EXACTLY);
+        }  else {
+            heightMeasureSpec = MeasureSpec.makeMeasureSpec(getChildAt(selectIndex).getMeasuredHeight(), MeasureSpec.AT_MOST);
+        }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 

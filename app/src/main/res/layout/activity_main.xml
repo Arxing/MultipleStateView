@@ -37,6 +37,7 @@
         app:msv_select="0"
         app:msv_first_enter_anim="false"
         app:msv_transDuration="500"
+        android:background="#000000"
         >
         <TextView
             android:layout_width="match_parent"
@@ -65,6 +66,26 @@
             android:text="View 3"
             android:textSize="60sp"
             app:layout_regName="v3"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#999900"
+            android:gravity="center"
+            android:text="View 4"
+            android:textSize="60sp"
+            app:layout_regName="v4"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#999944"
+            android:gravity="center"
+            android:text="View 5"
+            android:textSize="60sp"
+            app:layout_regName="v5"
             />
 
     </org.arxing.multiplestateview.MultipleStateView>
