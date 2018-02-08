@@ -96,17 +96,55 @@ public class MultipleStateView extends ViewAnimator {
         super.setDisplayedChild(whichChild);
     }
 
+    /**
+     * Measured self width and height in this method. The width value followed with self measure spec,
+     * but the height value followed with current child height.
+     * Finally, adjust margin and padding.
+     *
+     * exact value:
+     *      set size with child height value, mode is exact.
+     * wrap_content:
+     *      measure child height first, then set size with child measured height, mode is exact.
+     * match_parent:
+     *      set size with self size value, mode is exact.
+     */
     @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int hSpecSize = MeasureSpec.getSize(heightMeasureSpec);
-        int hSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+        int thisHeightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
+        int thisHeightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+        int newHeightSpecSize;
+        int newHeightSpecMode;
 
         View targetChild = getChildAt(selectIndex);
-        int h = targetChild.getLayoutParams().height;
-        if (h == ViewGroup.LayoutParams.MATCH_PARENT) {
-            heightMeasureSpec = MeasureSpec.makeMeasureSpec(hSpecSize, MeasureSpec.EXACTLY);
-        }  else {
-            heightMeasureSpec = MeasureSpec.makeMeasureSpec(getChildAt(selectIndex).getMeasuredHeight(), hSpecMode);
+        int targetLayoutH = targetChild.getLayoutParams().height;
+
+        switch (targetLayoutH) {
+            case ViewGroup.LayoutParams.WRAP_CONTENT:
+                targetChild.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(thisHeightSpecSize, MeasureSpec.AT_MOST));
+                newHeightSpecSize = targetChild.getMeasuredHeight();
+                newHeightSpecMode = MeasureSpec.EXACTLY;
+                break;
+            case ViewGroup.LayoutParams.MATCH_PARENT:
+                newHeightSpecSize = thisHeightSpecSize;
+                newHeightSpecMode = MeasureSpec.EXACTLY;
+                break;
+            default:
+                newHeightSpecSize = targetChild.getMeasuredHeight();
+                newHeightSpecMode = MeasureSpec.EXACTLY;
+                break;
         }
+        ViewGroup.LayoutParams layoutParams = targetChild.getLayoutParams();
+        if (layoutParams instanceof MarginLayoutParams) {
+            int topMargin = ((MarginLayoutParams) layoutParams).topMargin;
+            int bottomMargin = ((MarginLayoutParams) layoutParams).bottomMargin;
+            newHeightSpecSize += topMargin;
+            newHeightSpecSize += bottomMargin;
+        }
+        int paddingTop = getPaddingTop();
+        int paddingBottom = getPaddingBottom();
+        newHeightSpecSize += paddingTop;
+        newHeightSpecSize += paddingBottom;
+
+        heightMeasureSpec = MeasureSpec.makeMeasureSpec(newHeightSpecSize, newHeightSpecMode);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
@@ -194,6 +232,10 @@ public class MultipleStateView extends ViewAnimator {
     private void restoreAnimation() {
         setInAnimation(inAnim);
         setOutAnimation(outAnim);
+    }
+
+    private void test(String format, Object... objs) {
+        Log.d("tag", String.format(format, objs));
     }
 
     @Override public void addView(View child, int index, ViewGroup.LayoutParams params) {

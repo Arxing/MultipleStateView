@@ -33,60 +33,49 @@
     <org.arxing.multiplestateview.MultipleStateView
         android:id="@+id/msv"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:msv_select="0"
-        app:msv_first_enter_anim="false"
-        app:msv_transDuration="500"
-        android:background="#000000"
+        android:layout_height="match_parent"
+        android:background="#888888"
+        app:msv_select="2"
         >
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:background="#990000"
-            android:gravity="center"
-            android:text="View 1"
-            android:textSize="60sp"
-            app:layout_regName="v1"
-            />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="350dp"
-            android:background="#00aaaa"
-            android:gravity="center"
-            android:text="View 2"
-            android:textSize="60sp"
-            app:layout_regName="v2"
-            />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="#0f00f0"
-            android:gravity="center"
-            android:text="View 3"
-            android:textSize="60sp"
-            app:layout_regName="v3"
-            />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#999900"
-            android:gravity="center"
-            android:text="View 4"
-            android:textSize="60sp"
-            app:layout_regName="v4"
-            />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#999944"
+            android:layout_marginBottom="30dp"
+            android:background="#80ff0000"
             android:gravity="center"
-            android:text="View 5"
-            android:textSize="60sp"
-            app:layout_regName="v5"
+            android:text="view 1\nwrap_content"
+            app:layout_regName="0"
             />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#80ffff00"
+            android:gravity="center"
+            android:text="view 2\nmatch_parent"
+            app:layout_regName="1"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#008877"
+            android:orientation="vertical"
+            app:layout_regName="2"
+            >
+
+            <TextView
+                android:id="@+id/tvGameResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="90dp"
+                android:layout_marginTop="90dp"
+                android:gravity="center"
+                android:text="view 3\nlayout-wrap_content"
+                />
+
+        </LinearLayout>
 
     </org.arxing.multiplestateview.MultipleStateView>
 
