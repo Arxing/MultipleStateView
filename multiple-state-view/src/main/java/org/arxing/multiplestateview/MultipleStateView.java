@@ -98,13 +98,14 @@ public class MultipleStateView extends ViewAnimator {
 
     @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int hSpecSize = MeasureSpec.getSize(heightMeasureSpec);
+        int hSpecMode = MeasureSpec.getMode(heightMeasureSpec);
 
         View targetChild = getChildAt(selectIndex);
         int h = targetChild.getLayoutParams().height;
         if (h == ViewGroup.LayoutParams.MATCH_PARENT) {
             heightMeasureSpec = MeasureSpec.makeMeasureSpec(hSpecSize, MeasureSpec.EXACTLY);
         }  else {
-            heightMeasureSpec = MeasureSpec.makeMeasureSpec(getChildAt(selectIndex).getMeasuredHeight(), MeasureSpec.AT_MOST);
+            heightMeasureSpec = MeasureSpec.makeMeasureSpec(getChildAt(selectIndex).getMeasuredHeight(), hSpecMode);
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
