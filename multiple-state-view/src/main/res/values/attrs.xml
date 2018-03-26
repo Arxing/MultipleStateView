@@ -16,6 +16,10 @@
         <attr name="msv_transDuration" format="integer"/>
         <attr name="msv_select" format="integer|string"/>
         <attr name="msv_first_enter_anim" format="boolean"/>
+        <attr name="msv_measureMode" format="enum">
+            <enum name="FOLLOW_PARENT" value="1"/>
+            <enum name="FOLLOW_CHILD" value="2"/>
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="MultipleStateView_Layout">

@@ -23,11 +23,16 @@ import java.util.Map;
  */
 @SuppressLint("DefaultLocale")
 public class MultipleStateView extends ViewAnimator {
+    private final static int WIDTH = 1;
+    private final static int HEIGHT = 2;
+    public final static int MEASURE_MODE_FOLLOW_PARENT = 1;
+    public final static int MEASURE_MODE_FOLLOW_CHILD = 2;
     /// properties
     private int transDuration;
     private boolean isAnimating;
     private int selectIndex;
     private boolean firstEnterAnimation;
+    private int measureMode;
 
     private Map<String, Integer> regMap = new HashMap<>();
     private String selectName;
@@ -38,6 +43,7 @@ public class MultipleStateView extends ViewAnimator {
         super(context);
         initAttrs(null);
         init();
+
     }
 
     public MultipleStateView(Context context, AttributeSet attrs) {
@@ -52,6 +58,7 @@ public class MultipleStateView extends ViewAnimator {
             selectIndex = 0;
             useIndex = true;
             firstEnterAnimation = false;
+            measureMode = MEASURE_MODE_FOLLOW_CHILD;
         } else {
             TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.MultipleStateView);
             transDuration = ta.getInt(R.styleable.MultipleStateView_msv_transDuration, 100);
@@ -63,6 +70,7 @@ public class MultipleStateView extends ViewAnimator {
                 useIndex = false;
             }
             firstEnterAnimation = ta.getBoolean(R.styleable.MultipleStateView_msv_first_enter_anim, false);
+            measureMode = ta.getInt(R.styleable.MultipleStateView_msv_measureMode, MEASURE_MODE_FOLLOW_CHILD);
             ta.recycle();
         }
     }
@@ -100,52 +108,78 @@ public class MultipleStateView extends ViewAnimator {
      * Measured self width and height in this method. The width value followed with self measure spec,
      * but the height value followed with current child height.
      * Finally, adjust margin and padding.
-     *
+     * <p>
      * exact value:
-     *      set size with child height value, mode is exact.
+     * set size with child height value, mode is exact.
      * wrap_content:
-     *      measure child height first, then set size with child measured height, mode is exact.
+     * measure child height first, then set size with child measured height, mode is exact.
      * match_parent:
-     *      set size with self size value, mode is exact.
+     * set size with self size value, mode is exact.
      */
     @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int thisHeightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
-        int thisHeightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
-        int newHeightSpecSize;
-        int newHeightSpecMode;
+        switch (measureMode) {
+            case MEASURE_MODE_FOLLOW_PARENT:
+
+                break;
+            case MEASURE_MODE_FOLLOW_CHILD:
+                widthMeasureSpec = getNewSpec(widthMeasureSpec, heightMeasureSpec, WIDTH);
+                heightMeasureSpec = getNewSpec(widthMeasureSpec, heightMeasureSpec, HEIGHT);
+                break;
+        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    private int getNewSpec(int widthSpec, int heightSpec, int flag) {
+        int thisSizeSpecSize = MeasureSpec.getSize(flag == HEIGHT ? heightSpec : widthSpec);
+        int newSizeSpecSize, newSizeSpecMode;
 
         View targetChild = getChildAt(selectIndex);
-        int targetLayoutH = targetChild.getLayoutParams().height;
+        int targetLayoutSize = flag == HEIGHT ? targetChild.getLayoutParams().height : targetChild.getLayoutParams().width;
 
-        switch (targetLayoutH) {
+        switch (targetLayoutSize) {
             case ViewGroup.LayoutParams.WRAP_CONTENT:
-                targetChild.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(thisHeightSpecSize, MeasureSpec.AT_MOST));
-                newHeightSpecSize = targetChild.getMeasuredHeight();
-                newHeightSpecMode = MeasureSpec.EXACTLY;
+                if (flag == HEIGHT)
+                    targetChild.measure(widthSpec, MeasureSpec.makeMeasureSpec(thisSizeSpecSize, MeasureSpec.AT_MOST));
+                else
+                    targetChild.measure(MeasureSpec.makeMeasureSpec(thisSizeSpecSize, MeasureSpec.AT_MOST), heightSpec);
+                newSizeSpecSize = flag == HEIGHT ? targetChild.getMeasuredHeight() : targetChild.getMeasuredWidth();
+                newSizeSpecMode = MeasureSpec.EXACTLY;
                 break;
             case ViewGroup.LayoutParams.MATCH_PARENT:
-                newHeightSpecSize = thisHeightSpecSize;
-                newHeightSpecMode = MeasureSpec.EXACTLY;
+                newSizeSpecSize = thisSizeSpecSize;
+                newSizeSpecMode = MeasureSpec.EXACTLY;
                 break;
             default:
-                newHeightSpecSize = targetChild.getMeasuredHeight();
-                newHeightSpecMode = MeasureSpec.EXACTLY;
+                newSizeSpecSize = flag == HEIGHT ? targetChild.getMeasuredHeight() : targetChild.getMeasuredWidth();
+                newSizeSpecMode = MeasureSpec.EXACTLY;
                 break;
         }
         ViewGroup.LayoutParams layoutParams = targetChild.getLayoutParams();
         if (layoutParams instanceof MarginLayoutParams) {
-            int topMargin = ((MarginLayoutParams) layoutParams).topMargin;
-            int bottomMargin = ((MarginLayoutParams) layoutParams).bottomMargin;
-            newHeightSpecSize += topMargin;
-            newHeightSpecSize += bottomMargin;
+            if (flag == HEIGHT) {
+                int topMargin = ((MarginLayoutParams) layoutParams).topMargin;
+                int bottomMargin = ((MarginLayoutParams) layoutParams).bottomMargin;
+                newSizeSpecSize += topMargin;
+                newSizeSpecSize += bottomMargin;
+            } else {
+                int leftMargin = ((MarginLayoutParams) layoutParams).leftMargin;
+                int rightMargin = ((MarginLayoutParams) layoutParams).rightMargin;
+                newSizeSpecSize += leftMargin;
+                newSizeSpecSize += rightMargin;
+            }
         }
-        int paddingTop = getPaddingTop();
-        int paddingBottom = getPaddingBottom();
-        newHeightSpecSize += paddingTop;
-        newHeightSpecSize += paddingBottom;
-
-        heightMeasureSpec = MeasureSpec.makeMeasureSpec(newHeightSpecSize, newHeightSpecMode);
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        if (flag == HEIGHT) {
+            int paddingTop = getPaddingTop();
+            int paddingBottom = getPaddingBottom();
+            newSizeSpecSize += paddingTop;
+            newSizeSpecSize += paddingBottom;
+        } else {
+            int paddingLeft = getPaddingLeft();
+            int paddingRight = getPaddingRight();
+            newSizeSpecSize += paddingLeft;
+            newSizeSpecSize += paddingRight;
+        }
+        return MeasureSpec.makeMeasureSpec(newSizeSpecSize, newSizeSpecMode);
     }
 
     public void setDisplayedChild(String regName) {
